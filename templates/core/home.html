@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}MovieBook - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+{% if featured %}
+<div class="relative h-[60vh] md:h-[75vh] w-full overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/50 to-transparent z-10"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-dark via-dark/80 to-transparent z-10"></div>
+    <img src="{{ featured.banner_url }}" alt="{{ featured.title }}" class="absolute inset-0 w-full h-full object-cover object-top opacity-70">
+    
+    <div class="absolute inset-0 z-20 flex items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+        <div class="max-w-2xl">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 tracking-tight">{{ featured.title }}</h1>
+            
+            <div class="flex flex-wrap items-center gap-4 text-sm mb-6 text-gray-300 font-medium">
+                <span class="flex items-center gap-1 bg-gray-800/80 backdrop-blur px-3 py-1 rounded-full"><i class="fa-solid fa-star text-yellow-500"></i> {{ featured.rating }}/5</span>
+                <span class="bg-gray-800/80 backdrop-blur px-3 py-1 rounded-full">{{ featured.duration }} min</span>
+                <span class="bg-gray-800/80 backdrop-blur px-3 py-1 rounded-full">{{ featured.genre }}</span>
+                <span class="bg-gray-800/80 backdrop-blur px-3 py-1 rounded-full">{{ featured.language }}</span>
+                <span class="border border-gray-500 px-3 py-1 rounded-full">{{ featured.certificate }}</span>
+            </div>
+            
+            <p class="text-gray-300 mb-8 line-clamp-3 text-lg">{{ featured.description }}</p>
+            
+            <div class="flex flex-wrap gap-4">
+                <a href="{% url 'movie_details' featured.id %}" class="bg-primary hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg shadow-red-500/30 flex items-center gap-2">
+                    Book Tickets
+                </a>
+                <a href="{{ featured.trailer_url }}" target="_blank" class="bg-white/10 hover:bg-white/20 backdrop-blur text-white px-8 py-3.5 rounded-xl font-bold transition flex items-center gap-2">
+                    Watch Trailer
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+    
+    <!-- Recommended Movies -->
+    <section>
+        <div class="flex justify-between items-end mb-6">
+            <h2 class="text-2xl font-bold">Recommended Movies</h2>
+            <a href="#" class="text-primary hover:text-red-400 text-sm font-medium hidden sm:block">Explore All <i class="fa-solid fa-chevron-right text-xs"></i></a>
+        </div>
+        
+        <div class="flex gap-6 overflow-x-auto pb-6 hide-scrollbar snap-x">
+            {% for m in now_showing %}
+            <a href="{% url 'movie_details' m.id %}" class="flex-none w-44 md:w-60 group snap-start">
+                <div class="relative rounded-2xl overflow-hidden mb-4 aspect-[2/3] shadow-lg">
+                    <img src="{{ m.poster_url }}" alt="{{ m.title }}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-0 inset-x-0 p-4">
+                        <div class="flex items-center gap-1 text-sm font-bold text-white mb-1">
+                            <i class="fa-solid fa-star text-red-500"></i> {{ m.rating }}
+                        </div>
+                        <h3 class="font-bold text-white truncate text-lg group-hover:text-primary transition">{{ m.title }}</h3>
+                        <p class="text-xs text-gray-300 truncate">{{ m.language }}</p>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <p class="text-gray-500">No recommended movies at the moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Upcoming Movies -->
+    <section>
+        <div class="flex justify-between items-end mb-6">
+            <h2 class="text-2xl font-bold">Coming Soon</h2>
+        </div>
+        <div class="flex gap-6 overflow-x-auto pb-6 hide-scrollbar snap-x">
+            {% for m in upcoming %}
+            <div class="flex-none w-40 md:w-48 group snap-start">
+                <div class="relative rounded-2xl overflow-hidden mb-3 aspect-[2/3] shadow-lg">
+                    <img src="{{ m.poster_url }}" alt="{{ m.title }}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                        <span class="text-white font-medium text-sm border border-white/50 px-4 py-2 rounded-full">{{ m.release_date|date:"d M" }}</span>
+                    </div>
+                </div>
+                <h3 class="font-bold truncate text-base group-hover:text-primary transition">{{ m.title }}</h3>
+                <p class="text-xs text-gray-400 truncate">{{ m.genre }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Top Cinemas Near You -->
+    <section>
+        <div class="flex justify-between items-end mb-6">
+            <h2 class="text-2xl font-bold">Top Cinemas Near You</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for t in theatres %}
+            <div class="bg-card rounded-2xl p-6 border border-gray-800 hover:border-gray-600 transition flex flex-col justify-between group cursor-pointer">
+                <div>
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-lg font-bold group-hover:text-primary transition">{{ t.name }}</h3>
+                        <span class="flex items-center gap-1 text-xs font-bold bg-gray-800 px-2 py-1 rounded"><i class="fa-solid fa-star text-yellow-500"></i> {{ t.rating }}</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 leading-relaxed"><i class="fa-solid fa-location-dot text-gray-500 mr-2"></i>{{ t.address }}, {{ t.city.name }}</p>
+                </div>
+                <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-800">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] text-gray-500 uppercase tracking-wider">Distance</span>
+                        <span class="text-sm font-bold text-gray-300">{{ t.distance }} km</span>
+                    </div>
+                    <button class="bg-primary/10 text-primary px-4 py-2 rounded-lg font-medium hover:bg-primary hover:text-white transition text-sm">
+                        View Shows
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500">No cinemas found in {{ current_city }}.</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

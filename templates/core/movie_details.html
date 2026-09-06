@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}{{ movie.title }} - MovieBook{% endblock %}
+
+{% block content %}
+<div class="relative h-[40vh] md:h-[50vh] w-full overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-t from-dark via-dark/70 to-transparent z-10"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-dark via-dark/80 to-transparent z-10"></div>
+    <img src="{{ movie.banner_url }}" alt="{{ movie.title }}" class="absolute inset-0 w-full h-full object-cover object-top opacity-50 blur-sm">
+    
+    <div class="absolute inset-0 z-20 flex items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+        <div class="flex flex-col md:flex-row gap-8 items-center md:items-start">
+            <div class="w-48 md:w-64 flex-none rounded-xl overflow-hidden shadow-2xl border-4 border-gray-800 hidden md:block">
+                <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="w-full h-auto object-cover">
+            </div>
+            <div class="mt-4 md:mt-8">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">{{ movie.title }}</h1>
+                <div class="flex flex-wrap items-center gap-3 text-sm mb-6 text-gray-300 font-medium">
+                    <span class="flex items-center gap-1 bg-gray-800 px-3 py-1 rounded-full"><i class="fa-solid fa-star text-yellow-500"></i> {{ movie.rating }}/5</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full">{{ movie.duration }} min</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full">{{ movie.genre }}</span>
+                    <span class="bg-gray-800 px-3 py-1 rounded-full">{{ movie.language }}</span>
+                    <span class="border border-gray-500 px-3 py-1 rounded-full">{{ movie.certificate }}</span>
+                </div>
+                <p class="text-gray-300 mb-6 max-w-3xl text-sm md:text-base leading-relaxed">{{ movie.description }}</p>
+                
+                <div class="grid grid-cols-2 gap-4 max-w-sm mb-8 text-sm">
+                    <div>
+                        <span class="text-gray-500 block mb-1">Director</span>
+                        <span class="font-medium">{{ movie.director }}</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block mb-1">Cast</span>
+                        <span class="font-medium">{{ movie.cast }}</span>
+                    </div>
+                </div>
+                
+                <a href="#showtimes" class="bg-primary hover:bg-red-700 text-white px-8 py-3 rounded-lg font-semibold transition shadow-lg inline-block">
+                    Book Tickets
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="showtimes" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+        <h2 class="text-2xl font-bold">Theatres in <span class="text-primary">{{ current_city }}</span></h2>
+        <!-- Filters could go here -->
+    </div>
+    
+    <div class="space-y-6">
+        {% for theatre, shows in theatre_shows.items %}
+        <div class="bg-card rounded-xl p-6 border border-gray-800">
+            <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <div class="md:w-1/3">
+                    <h3 class="text-xl font-bold mb-2">{{ theatre.name }}</h3>
+                    <p class="text-gray-400 text-sm mb-2"><i class="fa-solid fa-location-dot mr-1"></i> {{ theatre.address }}</p>
+                    <div class="flex gap-4 text-xs text-gray-500">
+                        <span class="text-green-500"><i class="fa-solid fa-mobile-screen mr-1"></i> M-Ticket</span>
+                        <span class="text-yellow-500"><i class="fa-solid fa-burger mr-1"></i> Food & Bev</span>
+                    </div>
+                </div>
+                
+                <div class="md:w-2/3 flex flex-wrap gap-4 items-center">
+                    {% for show in shows %}
+                    <a href="{% url 'seat_selection' show.id %}" class="px-6 py-3 rounded border border-gray-600 text-gray-300 hover:border-primary hover:text-primary transition bg-gray-900 shadow-sm text-center min-w-[100px]">
+                        <div class="text-sm font-semibold">{{ show.start_time|date:"g:i A" }}</div>
+                        <div class="text-[10px] text-gray-500 mt-1">{{ show.screen.name }}</div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-12 bg-card rounded-xl border border-gray-800">
+            <i class="fa-solid fa-face-frown text-4xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-medium text-gray-300 mb-2">No shows available</h3>
+            <p class="text-gray-500">We couldn't find any upcoming shows for {{ movie.title }} in {{ current_city }}.</p>
+            <a href="{% url 'home' %}" class="inline-block mt-4 text-primary hover:underline">Go Back Home</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

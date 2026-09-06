@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}My Bookings - MovieBook{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12" x-data="{ tab: 'upcoming' }">
+    <h1 class="text-3xl font-bold mb-8">My Bookings</h1>
+    
+    <!-- Tabs -->
+    <div class="flex gap-8 border-b border-gray-800 mb-8">
+        <button @click="tab = 'upcoming'" :class="{ 'text-primary border-b-2 border-primary': tab === 'upcoming', 'text-gray-400 hover:text-gray-300': tab !== 'upcoming' }" class="pb-4 font-medium transition">Upcoming</button>
+        <button @click="tab = 'past'" :class="{ 'text-primary border-b-2 border-primary': tab === 'past', 'text-gray-400 hover:text-gray-300': tab !== 'past' }" class="pb-4 font-medium transition">Past Bookings</button>
+    </div>
+    
+    <!-- Upcoming -->
+    <div x-show="tab === 'upcoming'" class="space-y-6">
+        {% for b in upcoming %}
+        <div class="bg-card rounded-2xl p-6 border border-gray-800 flex flex-col md:flex-row gap-6 hover:border-gray-700 transition">
+            <img src="{{ b.show.movie.poster_url }}" alt="{{ b.show.movie.title }}" class="w-24 md:w-32 rounded-lg shadow-lg object-cover">
+            <div class="flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <h2 class="text-2xl font-bold">{{ b.show.movie.title }}</h2>
+                        <span class="bg-green-500/10 text-green-500 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider border border-green-500/20">Confirmed</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">{{ b.show.movie.language }} | {{ b.show.format }}</p>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1 uppercase">Date</p>
+                            <p class="font-medium text-sm">{{ b.show.start_time|date:"d M Y" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1 uppercase">Time</p>
+                            <p class="font-medium text-sm">{{ b.show.start_time|date:"g:i A" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1 uppercase">Cinema</p>
+                            <p class="font-medium text-sm truncate">{{ b.show.screen.theatre.name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1 uppercase">Seats</p>
+                            <p class="font-medium text-sm truncate" title="{{ b.seat_names }}">{{ b.seat_names }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap items-center justify-between border-t border-gray-800 pt-4 mt-2 gap-4">
+                    <p class="text-gray-400 text-sm">Booking ID: <span class="font-mono text-white">{{ b.booking_id }}</span></p>
+                    <div class="flex gap-3">
+                        <a href="{% url 'ticket' b.booking_id %}" class="bg-primary hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                            <i class="fa-solid fa-qrcode"></i> View Ticket
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-16 bg-card rounded-2xl border border-gray-800">
+            <i class="fa-solid fa-ticket text-5xl text-gray-700 mb-4"></i>
+            <h3 class="text-xl font-bold mb-2">No Upcoming Bookings</h3>
+            <p class="text-gray-500 mb-6">Looks like you haven't booked any movies yet.</p>
+            <a href="{% url 'home' %}" class="bg-primary hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition inline-block">Explore Movies</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Past -->
+    <div x-show="tab === 'past'" class="space-y-6" style="display: none;">
+        {% for b in past %}
+        <div class="bg-card rounded-2xl p-6 border border-gray-800 flex flex-col md:flex-row gap-6 opacity-75 hover:opacity-100 transition">
+            <img src="{{ b.show.movie.poster_url }}" alt="{{ b.show.movie.title }}" class="w-20 md:w-24 rounded-lg shadow-lg object-cover grayscale">
+            <div class="flex-1">
+                <div class="flex justify-between items-start mb-2">
+                    <h2 class="text-xl font-bold">{{ b.show.movie.title }}</h2>
+                    <span class="text-gray-500 text-xs font-bold uppercase tracking-wider">Completed</span>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">{{ b.show.start_time|date:"d M Y, g:i A" }} · {{ b.show.screen.theatre.name }}</p>
+                
+                <div class="flex justify-between items-center border-t border-gray-800 pt-4">
+                    <p class="text-gray-500 text-sm">Seats: {{ b.seat_names }}</p>
+                    <p class="font-bold">₹{{ b.total_amount }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-16">
+            <p class="text-gray-500">You don't have any past bookings.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

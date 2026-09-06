@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Your Ticket - MovieBook{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-check text-3xl"></i>
+        </div>
+        <h1 class="text-3xl font-bold mb-2">Booking Confirmed!</h1>
+        <p class="text-gray-400">Your ticket has been sent to your email.</p>
+    </div>
+
+    <!-- Ticket -->
+    <div class="bg-white text-black rounded-2xl overflow-hidden shadow-2xl mx-auto relative">
+        <div class="absolute -left-4 top-1/2 w-8 h-8 bg-dark rounded-full -translate-y-1/2"></div>
+        <div class="absolute -right-4 top-1/2 w-8 h-8 bg-dark rounded-full -translate-y-1/2"></div>
+        
+        <div class="p-6 md:p-8 flex flex-col md:flex-row gap-6 border-b-2 border-dashed border-gray-300">
+            <img src="{{ booking.show.movie.poster_url }}" alt="{{ booking.show.movie.title }}" class="w-24 md:w-32 rounded-lg shadow mx-auto md:mx-0 object-cover">
+            
+            <div class="flex-1 text-center md:text-left">
+                <h2 class="text-2xl font-bold mb-1">{{ booking.show.movie.title }}</h2>
+                <p class="text-gray-600 text-sm mb-4">{{ booking.show.movie.language }} | {{ booking.show.movie.certificate }}</p>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Date & Time</p>
+                        <p class="font-bold">{{ booking.show.start_time|date:"D, d M, Y" }}</p>
+                        <p class="font-bold">{{ booking.show.start_time|date:"g:i A" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Theatre</p>
+                        <p class="font-bold text-sm">{{ booking.show.screen.theatre.name }}</p>
+                        <p class="font-bold text-sm">{{ booking.show.screen.name }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-6 md:p-8 bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-center md:text-left w-full md:w-auto">
+                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Seats ({{ seat_numbers|length }})</p>
+                <p class="text-xl font-bold mb-4">{{ seat_numbers }}</p>
+                
+                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Booking ID</p>
+                <p class="text-lg font-mono font-bold">{{ booking.booking_id }}</p>
+            </div>
+            
+            <!-- Mock QR Code -->
+            <div class="text-center">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ booking.booking_id }}" alt="QR Code" class="w-32 h-32 mx-auto mix-blend-multiply">
+                <p class="text-[10px] text-gray-500 mt-2">Scan at the entrance</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-8 text-center">
+        <a href="{% url 'home' %}" class="inline-block border border-gray-600 hover:border-gray-400 text-gray-300 px-6 py-2 rounded-lg transition font-medium">Back to Home</a>
+    </div>
+
+</div>
+{% endblock %}

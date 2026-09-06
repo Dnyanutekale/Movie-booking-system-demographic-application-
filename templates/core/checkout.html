@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}Checkout - MovieBook{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'seat_selection' show.id %}" class="text-gray-400 hover:text-white"><i class="fa-solid fa-arrow-left"></i> Back</a>
+        <h1 class="text-3xl font-bold">Secure Checkout</h1>
+    </div>
+    
+    <div class="flex flex-col lg:flex-row gap-8 items-start">
+        
+        <!-- Summary -->
+        <div class="w-full lg:w-1/3 order-2 lg:order-1">
+            <div class="bg-card rounded-2xl p-6 border border-gray-800 sticky top-24 shadow-2xl">
+                <div class="flex gap-4 mb-6 pb-6 border-b border-gray-800">
+                    <img src="{{ show.movie.poster_url }}" alt="{{ show.movie.title }}" class="w-20 h-28 object-cover rounded-lg shadow-lg">
+                    <div>
+                        <h2 class="text-xl font-bold mb-1">{{ show.movie.title }}</h2>
+                        <p class="text-gray-400 text-xs mb-2">{{ show.language }} | {{ show.format }} | {{ show.movie.certificate }}</p>
+                        <p class="text-gray-300 text-sm font-medium">{{ show.screen.theatre.name }}</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4 text-sm mb-6 pb-6 border-b border-gray-800">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Date & Time</p>
+                        <p class="font-medium text-white">{{ show.start_time|date:"D, d M Y | g:i A" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Selected Seats ({{ selected_seats|length }})</p>
+                        <p class="font-medium text-white break-words">
+                            {% for seat in selected_seats %}
+                                {{ seat.number }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="space-y-3 text-sm border-b border-gray-800 pb-6 mb-6">
+                    <div class="flex justify-between text-gray-300">
+                        <span>Tickets Total</span>
+                        <span class="font-medium text-white">₹{{ total_price }}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                        <span>Convenience Fee</span>
+                        <span>₹{{ convenience_fee }}</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                        <span>Integrated GST (18%)</span>
+                        <span>₹{{ taxes }}</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-end mb-4 bg-gray-900/50 p-4 rounded-xl border border-gray-800">
+                    <span class="text-sm font-medium text-gray-400 uppercase tracking-wider">Amount Payable</span>
+                    <span class="text-3xl font-bold text-primary">₹{{ total_amount }}</span>
+                </div>
+                
+                <div class="bg-green-500/10 border border-green-500/20 text-green-400 text-xs p-3 rounded-lg flex gap-2">
+                    <i class="fa-solid fa-circle-check mt-0.5"></i>
+                    <p>Free cancellation available until 4 hours before showtime.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Options -->
+        <div class="w-full lg:w-2/3 order-1 lg:order-2" x-data="{ method: 'upi' }">
+            
+            <div class="bg-card rounded-2xl p-6 border border-gray-800 shadow-xl mb-6">
+                <h3 class="text-xl font-bold mb-4">Contact Details</h3>
+                <p class="text-sm text-gray-400 mb-4">Your ticket will be sent to these details.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">Email Address</label>
+                        <input type="email" value="guest@example.com" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">Phone Number</label>
+                        <input type="text" value="+91 9876543210" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-card rounded-2xl border border-gray-800 shadow-xl overflow-hidden">
+                <div class="p-6 border-b border-gray-800">
+                    <h3 class="text-xl font-bold">Payment Method</h3>
+                </div>
+                
+                <div class="flex flex-col md:flex-row min-h-[300px]">
+                    <!-- Tabs -->
+                    <div class="w-full md:w-1/3 bg-gray-900/50 border-r border-gray-800">
+                        <button @click="method = 'upi'" :class="method === 'upi' ? 'bg-card border-l-4 border-l-primary text-white' : 'text-gray-400 hover:bg-gray-800 border-l-4 border-l-transparent'" class="w-full text-left p-4 font-medium transition flex items-center justify-between">
+                            <div class="flex items-center gap-3"><i class="fa-brands fa-google-pay text-xl"></i> UPI</div>
+                            <i x-show="method === 'upi'" class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                        <button @click="method = 'card'" :class="method === 'card' ? 'bg-card border-l-4 border-l-primary text-white' : 'text-gray-400 hover:bg-gray-800 border-l-4 border-l-transparent'" class="w-full text-left p-4 font-medium transition flex items-center justify-between">
+                            <div class="flex items-center gap-3"><i class="fa-regular fa-credit-card text-xl"></i> Debit / Credit Card</div>
+                            <i x-show="method === 'card'" class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                        <button @click="method = 'netbanking'" :class="method === 'netbanking' ? 'bg-card border-l-4 border-l-primary text-white' : 'text-gray-400 hover:bg-gray-800 border-l-4 border-l-transparent'" class="w-full text-left p-4 font-medium transition flex items-center justify-between">
+                            <div class="flex items-center gap-3"><i class="fa-solid fa-building-columns text-xl"></i> Net Banking</div>
+                            <i x-show="method === 'netbanking'" class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="w-full md:w-2/3 p-6 flex flex-col justify-between">
+                        
+                        <!-- UPI -->
+                        <div x-show="method === 'upi'" class="animate-fade-in-up flex-1">
+                            <p class="text-sm text-gray-400 mb-4">Pay instantly using any UPI app.</p>
+                            <div class="flex gap-4 mb-6">
+                                <div class="w-12 h-12 bg-white rounded flex items-center justify-center p-2"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/UPI-Logo.png" class="max-w-full max-h-full"></div>
+                                <div class="w-12 h-12 bg-black rounded border border-gray-700 flex items-center justify-center p-2"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Pay_Logo.svg" class="max-w-full max-h-full"></div>
+                            </div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">UPI ID</label>
+                            <input type="text" placeholder="username@upi" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition mb-4">
+                        </div>
+                        
+                        <!-- Card -->
+                        <div x-show="method === 'card'" class="animate-fade-in-up flex-1" style="display: none;">
+                            <p class="text-sm text-gray-400 mb-4">Enter your card details.</p>
+                            <label class="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">Card Number</label>
+                            <input type="text" placeholder="XXXX XXXX XXXX XXXX" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition mb-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">Expiry</label>
+                                    <input type="text" placeholder="MM/YY" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">CVV</label>
+                                    <input type="password" placeholder="XXX" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Net Banking -->
+                        <div x-show="method === 'netbanking'" class="animate-fade-in-up flex-1" style="display: none;">
+                            <p class="text-sm text-gray-400 mb-4">Select your bank.</p>
+                            <select class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-primary focus:outline-none transition mb-4 appearance-none">
+                                <option>HDFC Bank</option>
+                                <option>State Bank of India</option>
+                                <option>ICICI Bank</option>
+                                <option>Axis Bank</option>
+                            </select>
+                        </div>
+                        
+                        <form method="POST" action="{% url 'checkout' show.id %}" class="mt-6 border-t border-gray-800 pt-6">
+                            {% csrf_token %}
+                            <input type="hidden" name="selected_seats" value="{{ selected_seats_json }}">
+                            <input type="hidden" name="action" value="pay">
+                            <button type="submit" class="w-full bg-primary hover:bg-red-700 text-white py-4 rounded-xl font-bold text-lg transition shadow-lg flex justify-center items-center gap-2">
+                                Pay ₹{{ total_amount }} Securely <i class="fa-solid fa-lock text-sm ml-1"></i>
+                            </button>
+                            <p class="text-center text-xs text-gray-500 mt-4"><i class="fa-solid fa-shield-halved mr-1"></i> Mock Payment Gateway for Development</p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

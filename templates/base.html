@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MovieBook{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#E50914', // Red accent
+                        dark: '#141414',
+                        card: '#1F1F1F',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #141414; color: #fff; padding-bottom: env(safe-area-inset-bottom); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @media (max-width: 768px) { body { padding-bottom: 70px; } }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="antialiased font-sans" x-data="{ searchOpen: false, cityModalOpen: false }">
+    
+    <!-- Navbar -->
+    <nav class="bg-black/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <a href="{% url 'home' %}" class="flex items-center gap-2">
+                        <i class="fa-solid fa-film text-primary text-2xl"></i>
+                        <span class="text-2xl font-bold text-white tracking-tight">Movie<span class="text-primary">Book</span></span>
+                    </a>
+                </div>
+                
+                <!-- Search -->
+                <div class="hidden md:block flex-1 max-w-xl mx-8">
+                    <div class="relative cursor-pointer" @click="searchOpen = true">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" readonly class="block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-full leading-5 bg-gray-800 text-gray-400 cursor-pointer focus:outline-none sm:text-sm" placeholder="Search for Movies, Cinemas...">
+                    </div>
+                </div>
+
+                <!-- Right Nav -->
+                <div class="flex items-center gap-4">
+                    <!-- Mobile Search Icon -->
+                    <button @click="searchOpen = true" class="md:hidden text-gray-300 hover:text-white">
+                        <i class="fa-solid fa-search"></i>
+                    </button>
+                    
+                    <!-- City Selector -->
+                    <button @click="cityModalOpen = true" class="flex items-center gap-1 text-sm text-gray-300 hover:text-white transition">
+                        <span class="max-w-[100px] truncate hidden sm:block">{{ current_city|default:"Select City" }}</span>
+                        <i class="fa-solid fa-location-dot text-primary sm:hidden"></i>
+                        <i class="fa-solid fa-chevron-down text-xs hidden sm:block"></i>
+                    </button>
+                    
+                    <a href="/admin" class="hidden sm:block text-sm font-medium text-white bg-primary hover:bg-red-700 px-4 py-2 rounded-lg transition shadow-lg shadow-red-500/30">
+                        Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Global Search Modal -->
+    <div x-show="searchOpen" class="fixed inset-0 z-[100] overflow-y-auto" style="display: none;">
+        <div class="flex items-start justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+            <div x-show="searchOpen" x-transition.opacity class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" @click="searchOpen = false"></div>
+            <div x-show="searchOpen" x-transition class="relative bg-card rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-3xl w-full border border-gray-700 mt-20">
+                <div class="p-4 flex items-center border-b border-gray-700">
+                    <i class="fa-solid fa-search text-gray-400 mr-3"></i>
+                    <input type="text" class="w-full bg-transparent border-none text-xl focus:outline-none text-white placeholder-gray-500" placeholder="Search movies, cinemas, genres..." autofocus>
+                    <button @click="searchOpen = false" class="text-gray-400 hover:text-white"><i class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 h-96 overflow-y-auto">
+                    <p class="text-gray-500 text-sm">Type to search...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- City Selector Modal -->
+    <div x-show="cityModalOpen" class="fixed inset-0 z-[100] overflow-y-auto" style="display: none;">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+            <div x-show="cityModalOpen" x-transition.opacity class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" @click="cityModalOpen = false"></div>
+            <div x-show="cityModalOpen" x-transition class="relative bg-card rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-2xl w-full border border-gray-700">
+                <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                    <h3 class="text-xl font-bold">Select City</h3>
+                    <button @click="cityModalOpen = false" class="text-gray-400 hover:text-white"><i class="fa-solid fa-times text-xl"></i></button>
+                </div>
+                <div class="p-6 bg-gray-900">
+                    <button class="w-full mb-6 bg-primary/10 text-primary border border-primary/20 py-3 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-primary/20 transition">
+                        <i class="fa-solid fa-location-crosshairs"></i> Detect my location
+                    </button>
+                    <h4 class="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">Popular Cities</h4>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                        {% for city in cities %}
+                        <a href="{% url 'set_city' city.name %}" class="flex flex-col items-center p-3 rounded-xl hover:bg-gray-800 transition border border-transparent hover:border-gray-700 group">
+                            <div class="w-12 h-12 rounded-full bg-gray-800 group-hover:bg-gray-700 flex items-center justify-center mb-2">
+                                <i class="fa-solid fa-city text-gray-400 group-hover:text-white"></i>
+                            </div>
+                            <span class="text-sm text-center font-medium">{{ city.name }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer (Desktop only) -->
+    <footer class="hidden md:block bg-black border-t border-gray-800 py-12 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-400 text-sm">
+                <div class="flex justify-center gap-6 text-2xl mb-6">
+                    <a href="#" class="hover:text-white transition"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" class="hover:text-white transition"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" class="hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
+                </div>
+                <p>&copy; 2026 MovieBook. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="md:hidden fixed bottom-0 inset-x-0 bg-black/95 backdrop-blur border-t border-gray-800 z-50 px-6 py-2 flex justify-between items-center pb-[max(env(safe-area-inset-bottom),8px)]">
+        <a href="{% url 'home' %}" class="flex flex-col items-center gap-1 text-primary">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] font-medium">Home</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+            <i class="fa-solid fa-film text-xl"></i>
+            <span class="text-[10px] font-medium">Movies</span>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+            <i class="fa-solid fa-ticket text-xl"></i>
+            <span class="text-[10px] font-medium">Bookings</span>
+        </a>
+        <a href="/admin" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+            <i class="fa-solid fa-user text-xl"></i>
+            <span class="text-[10px] font-medium">Profile</span>
+        </a>
+    </div>
+
+</body>
+</html>
